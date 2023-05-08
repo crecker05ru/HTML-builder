@@ -16,9 +16,9 @@ let outDirPath = path.join(__dirname, outDir)
 let sourceDirPath = path.join(__dirname, sourceDir)
 let componentsFolderPath = path.join(__dirname, componentsFolder)
 let templateName = "template.html"
-let templateContent
 let beforeDot = /.*(?=[\.])/ // /.*\./
 let afterBracket = /\{{[^)]*\}}/
+let betweenBrackets = /[^{\{]+(?=}\})/
 
 function indexOf(array, toFind, arrProperty) {
   for (let i = 0; i < array.length; i += 1) {
@@ -40,6 +40,7 @@ async function writeHtml(temp) {
 }
 
 async function writeIndex() {
+  let templateContent
   try {
     let sourceFiles = await readdir(sourceDirPath, { withFileTypes: true })
     let componentsFiles = await readdir(componentsFolderPath, {
@@ -65,8 +66,8 @@ async function writeIndex() {
                         component.name.match(beforeDot)[0]
                       )[0] === component.name.match(beforeDot)[0]
                     ) {
-                      templateContent.replace(afterBracket, data)
-                      writeHtml(templateContent.replace(afterBracket, data))
+                      templateContent = templateContent.replace("{{"+component.name.match(beforeDot)[0]+"}}", data)
+                      writeHtml(templateContent)
                     }
                   }
                 }
