@@ -7,273 +7,123 @@ const { copyFile } = require("fs/promises")
 
 let outDir = "/project-dist"
 let sourceDir = "/"
-let stylesDir = '/styles'
-let assetsDir = '/assets'
+let stylesDir = "/styles"
+let assetsDir = "/assets"
 let stylesDirPath = path.join(__dirname, stylesDir)
 let assetsDirPath = path.join(__dirname, assetsDir)
-let componentsFolder = 'components'
+let componentsFolder = "components"
 let outDirPath = path.join(__dirname, outDir)
 let sourceDirPath = path.join(__dirname, sourceDir)
 let componentsFolderPath = path.join(__dirname, componentsFolder)
-let templateName =  'template.html'
+let templateName = "template.html"
 let templateContent
 let beforeDot = /.*(?=[\.])/ // /.*\./
 let afterBracket = /\{{[^)]*\}}/
 
-// function isTemplate(element,index){
-//   console.log('element',element)
-//   if(element.name === templateName){
-
-//     return index
-//   }
-// }
-
-function indexOf(array,toFind,arrProperty){
-  for(let i = 0; i < array.length;i += 1){
-    if(array[i][arrProperty] === toFind){
+function indexOf(array, toFind, arrProperty) {
+  for (let i = 0; i < array.length; i += 1) {
+    if (array[i][arrProperty] === toFind) {
       return i
     }
   }
   return -1
 }
 
-async function writeHtml(temp){
+async function writeHtml(temp) {
   try {
-    fs.writeFile(
-      path.join(outDirPath, "index.html"),
-      temp,
-      (err) => {
-        // console.log('templateContent',templateContent)
-        if (err) throw err
-      }
-    )
-    // mkdir(outDirPath, { recursive: true }).then((data) => {
-    //   if (!data) {
-    //     try {
-    //       rm(outDirPath, { recursive: true }).then((data) => {
-    //         try {
-    //           if (!data) {
-    //             try {
-    //                mkdir(outDirPath, { recursive: true })
-    //             // copyFiles()
-    //             fs.writeFile(
-    //               path.join(outDirPath, "index.html"),
-    //               temp,
-    //               (err) => {
-    //                 // console.log('templateContent',templateContent)
-    //                 if (err) throw err
-    //               }
-    //             )
-    //             bundleCss()
-    //             // copyAssets()
-    //             // copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
-    //             }catch(e){
-    //               console.log('bundleCss,copyFolder',e)
-    //             }
-               
-    //           }
-    //         }catch(e){
-    //           console.log(rm,'e')
-    //         }
- 
-    //       })
-    //     }catch(e){
-    //       console.log('writeHtml rm',e)
-    //     }
-
-    //   } else {
-    //     // copyFiles()
-    //     fs.writeFile(
-    //       path.join(outDirPath, "index.html"),
-    //       temp,
-    //       (err) => {
-    //         // console.log('templateContent',templateContent)
-    //         if (err) throw err
-    //       }
-    //     )
-    //     try {
-    //       bundleCss()
-    //       // copyAssets()
-    //       // copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
-    //     }catch(e){
-    //       console.log('bundleCss,copyFolder',e)
-    //     }
-
-    //   }
-    // })
-  }catch(e){
-    console.log('writeHtml',e)
+    fs.writeFile(path.join(outDirPath, "index.html"), temp, (err) => {
+      if (err) throw err
+    })
+  } catch (e) {
+    console.log("writeHtml", e)
   }
-
 }
 
-async function writeIndex(){
-     try {
-      let sourceFiles = await readdir(sourceDirPath, { withFileTypes: true })
-      let componentsFiles = await readdir(componentsFolderPath, { withFileTypes: true })
-      
-      let templateIndex = indexOf(sourceFiles,templateName,'name')
-      console.log('sourceFiles',sourceFiles)
-      console.log('templateIndex',templateIndex)
-      if(templateIndex !== -1){
-        fs.readFile(path.join(sourceDirPath, sourceFiles[templateIndex].name),"utf8",(err,data) => {
+async function writeIndex() {
+  try {
+    let sourceFiles = await readdir(sourceDirPath, { withFileTypes: true })
+    let componentsFiles = await readdir(componentsFolderPath, {
+      withFileTypes: true,
+    })
+
+    let templateIndex = indexOf(sourceFiles, templateName, "name")
+    if (templateIndex !== -1) {
+      fs.readFile(
+        path.join(sourceDirPath, sourceFiles[templateIndex].name),
+        "utf8",
+        (err, data) => {
           if (!err) {
-            // console.log('data',data)
-            templateContent =  data
-            for(let component of componentsFiles){
-              fs.readFile(path.join(componentsFolderPath, component.name),"utf8",(err,data) => {
-                if (!err) {
-                  // console.log('data',data)
-                  
-                  // console.log('component.name.match(beforeDot)',component.name.match(beforeDot)[0])
-        
-                  // console.log('templateContent.match(component.name.match(beforeDot)[0])',templateContent.match(component.name.match(beforeDot)[0]))
-                  // console.log('component.name.match(beforeDot)[0]',component.name.match(beforeDot)[0])
-                  // console.log('templateContent.match(component.name.match(beforeDot)[0])[0]',templateContent.match(component.name.match(beforeDot)[0])[0])
-                  if(templateContent.match(component.name.match(beforeDot)[0])[0] === component.name.match(beforeDot)[0]){
-                    // console.log('if(templateContent')
-                  templateContent.replace(afterBracket,data)
-                  // writeHtml(templateContent)
-  
-                  writeHtml(templateContent.replace(afterBracket,data))
+            templateContent = data
+            for (let component of componentsFiles) {
+              fs.readFile(
+                path.join(componentsFolderPath, component.name),
+                "utf8",
+                (err, data) => {
+                  if (!err) {
+                    if (
+                      templateContent.match(
+                        component.name.match(beforeDot)[0]
+                      )[0] === component.name.match(beforeDot)[0]
+                    ) {
+                      templateContent.replace(afterBracket, data)
+                      writeHtml(templateContent.replace(afterBracket, data))
+                    }
                   }
-  
-                  
-                  // fs.appendFile(path.join(__dirname,'/','text.txt'),data.toString(),err => {
-                  //   if(err) throw err
-                  // })
-  
-                  // if(templateContent.afterBracket === beforeDot.matches(component.name))
-                  // templateContent.replace(afterBracket,data)
                 }
-                
-  
-                
-        
-                // fs.writeFile(
-                //   path.join(outDirPath, "index.html"),
-                //   'templateContent',
-                //   (err) => {
-                //     console.log('templateContent',templateContent)
-                //     if (err) throw err
-                //   }
-                // )
-              })
+              )
             }
           }
-        })
-      }
-     }catch(e){
-      console.log('writeIndex',e)
-     }             
+        }
+      )
+    }
+  } catch (e) {
+    console.log("writeIndex", e)
+  }
 }
-async function build(){
+async function build() {
   try {
-        console.log('mkdir(outDirPath, { recursive: true }).then')
-        mkdir(outDirPath, { recursive: true }).then((data) => {
+    mkdir(outDirPath, { recursive: true }).then((data) => {
       if (!data) {
         try {
-          console.log('data in mkdir(outDirPath, { recursive: true }).then',data)
-          console.log(' rm(outDirPath, { recursive: true }).then')
           rm(outDirPath, { recursive: true }).then((data) => {
             try {
-              console.log('data in rm(outDirPath, { recursive: true }).then',data)
               if (!data) {
                 try {
-                  console.log('mkdir(outDirPath, { recursive: true })')
-                   mkdir(outDirPath, { recursive: true })
-                // copyFiles()
-
-                bundleCss()
-                writeIndex()
-                // copyAssets()
-                copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
-                }catch(e){
-                  console.log('bundleCss,copyFolder',e)
-                } 
+                  mkdir(outDirPath, { recursive: true })
+                  bundleCss()
+                  writeIndex()
+                  copyFolder(
+                    path.join(sourceDirPath, assetsDir),
+                    path.join(outDirPath, assetsDir)
+                  )
+                } catch (e) {
+                  console.log("bundleCss,copyFolder", e)
+                }
               }
-            }catch(e){
-              console.log(rm,'e')
+            } catch (e) {
+              console.log(rm, "e")
             }
- 
           })
-        }catch(e){
-          console.log('writeHtml rm',e)
+        } catch (e) {
+          console.log("writeHtml rm", e)
         }
-
       } else {
-        // copyFiles()
         try {
-          console.log('ELSE')
           bundleCss()
           writeIndex()
-          // copyAssets()
-          copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
-        }catch(e){
-          console.log('bundleCss,copyFolder',e)
+          copyFolder(
+            path.join(sourceDirPath, assetsDir),
+            path.join(outDirPath, assetsDir)
+          )
+        } catch (e) {
+          console.log("bundleCss,copyFolder", e)
         }
-
       }
     })
-   
-
-    // for(let component of componentsFiles){
-    //   fs.readFile(path.join(componentsFolderPath, component.name),"utf8",(err,data) => {
-    //     if (!err) {
-    //       // console.log('data',data)
-          
-    //       // console.log('component.name.match(beforeDot)',component.name.match(beforeDot)[0])
-
-    //       // console.log('templateContent.match(component.name.match(beforeDot)[0])',templateContent.match(component.name.match(beforeDot)[0]))
-
-    //       if(templateContent.match(component.name.match(beforeDot)[0]) === component.name.match(beforeDot)[0])
-    //       templateContent.replace(afterBracket,data)
-    //       // if(templateContent.afterBracket === beforeDot.matches(component.name))
-    //       // templateContent.replace(afterBracket,data)
-    //     }
-
-    //     fs.writeFile(
-    //       path.join(outDirPath, "/", "index.html"),
-    //       templateContent,
-    //       (err) => {
-    //         if (err) throw err
-    //       }
-    //     )
-    //   })
-    // }
-
-    // return new Promise((resolve,reject) => {
-    //   // resolve(templateContent)
-    //   let buf = Buffer.from(String(templateContent))
-    //   resolve(buf)
-    //   reject(new Error())
-    // })
-
-  }catch(e){
+  } catch (e) {
     console.log(e)
   }
-
 }
-
-// async function readFile(file){
-//   try {
-//     let sourceFiles = await readdir(sourceDirPath, { withFileTypes: true })
-//     let componentsFiles = await readdir(componentsFolderPath, { withFileTypes: true })
-    
-//     let templateIndex = indexOf(sourceFiles,templateName,'name')
-//     console.log('sourceFiles',sourceFiles)
-//     console.log('templateIndex',templateIndex)
-//     if(templateIndex !== -1){
-//       fs.readFile(path.join(sourceDirPath, sourceFiles[templateIndex].name),"utf8",(err,data) => {
-//         if (!err) {
-//           console.log('data',data)
-//         }
-//       })
-//     }
-//   }catch(e){
-//     console.log(e)
-//   }
-// }
 
 async function bundleCss() {
   try {
@@ -290,13 +140,10 @@ async function bundleCss() {
               filesContent.push(data)
               filesCount += 1
               if (filesContent.length === filesCount) {
-                // console.log('filesContent',filesContent)
-                // console.log('path.join(outDirPath, "bundle.css")',path.join(outDirPath, "bundle.css"))
                 fs.writeFile(
                   path.join(outDirPath, "bundle.css"),
                   filesContent.join("\n"),
                   (err) => {
-                    console.log('yes')
                     if (err) throw err
                   }
                 )
@@ -313,62 +160,50 @@ async function bundleCss() {
   }
 }
 
-async function copyFiles(src,dest) {
+async function copyFiles(src, dest) {
   try {
-    console.log('src,dest',src,dest)
-    let files = await readdir(src,{withFileTypes: true})
+    let files = await readdir(src, { withFileTypes: true })
     for (let file of files) {
-      console.log('file',file)
-      if(file.isDirectory()){
-        // copyFiles(path.join(src, file.name),path.join(dest,file.name)) // рекурсивный метод на папки
-        copyFolder(path.join(src, file.name),path.join(dest,file.name))
-      }else {
-        copyFile(path.join(src, file.name), path.join(dest,file.name))
+      if (file.isDirectory()) {
+        copyFolder(path.join(src, file.name), path.join(dest, file.name))
+      } else {
+        copyFile(path.join(src, file.name), path.join(dest, file.name))
       }
-
     }
   } catch (e) {
     console.log(e)
   }
 }
 
-async function copyFolder(src,dest){ // создает папки
+async function copyFolder(src, dest) {
   try {
-    console.log('dest',dest)
     mkdir(dest, { recursive: true }).then((data) => {
       if (!data) {
         try {
-          rm(dest, { recursive: true}).then((data) => {
+          rm(dest, { recursive: true }).then((data) => {
             if (!data) {
               try {
                 mkdir(dest, { recursive: true })
-                copyFiles(src,dest)
-              }catch(e){
-                console.log('mkdir',e)
+                copyFiles(src, dest)
+              } catch (e) {
+                console.log("mkdir", e)
               }
-
             }
           })
-        }catch(e){
-          console.log('rm',e)
+        } catch (e) {
+          console.log("rm", e)
         }
-
       } else {
-        copyFiles(src,dest)
+        copyFiles(src, dest)
       }
     })
-  }catch(e){
+  } catch (e) {
     console.log(e)
   }
 }
 
 try {
   build()
-  // copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
-  // copyAssets()
-  // bundleCss()
-}catch(e){
+} catch (e) {
   console.log(e)
 }
-
-// build().then(data => writeHtml(data),e => console.log(e))
