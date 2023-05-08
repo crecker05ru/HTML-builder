@@ -52,6 +52,9 @@ async function writeHtml(temp){
               if (err) throw err
             }
           )
+          bundleCss()
+          // copyAssets()
+          copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
         }
       })
     } else {
@@ -64,6 +67,9 @@ async function writeHtml(temp){
           if (err) throw err
         }
       )
+      bundleCss()
+      // copyAssets()
+      copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
     }
   })
 }
@@ -197,10 +203,13 @@ async function bundleCss() {
               filesContent.push(data)
               filesCount += 1
               if (filesContent.length === filesCount) {
+                // console.log('filesContent',filesContent)
+                // console.log('path.join(outDirPath, "bundle.css")',path.join(outDirPath, "bundle.css"))
                 fs.writeFile(
-                  path.join(outDirPath, "/", "bundle.css"),
+                  path.join(outDirPath, "bundle.css"),
                   filesContent.join("\n"),
                   (err) => {
+                    console.log('yes')
                     if (err) throw err
                   }
                 )
@@ -217,29 +226,38 @@ async function bundleCss() {
   }
 }
 
-async function copyFiles() {
+async function copyFiles(src,dest) {
   try {
-    let files = await readdir(assetsDirPath)
+    console.log('src,dest',src,dest)
+    let files = await readdir(src,{withFileTypes: true})
     for (let file of files) {
-      copyFile(path.join(assetsDirPath, file), path.join(outDirPath,assetsDir,file))
+      console.log('file',file)
+      if(file.isDirectory()){
+        // copyFiles(path.join(src, file.name),path.join(dest,file.name)) // рекурсивный метод на папки
+        copyFolder(path.join(src, file.name),path.join(dest,file.name))
+      }else {
+        copyFile(path.join(src, file.name), path.join(dest,file.name))
+      }
+
     }
   } catch (e) {
     console.log(e)
   }
 }
 
-async function copyAssets(){
+async function copyFolder(src,dest){ // создает папки
   try {
-    mkdir(path.join(outDirPath,stylesDir), { recursive: true }).then((data) => {
+    console.log('dest',dest)
+    mkdir(dest, { recursive: true }).then((data) => {
       if (!data) {
-        rm(path.join(outDirPath,stylesDir), { recursive: true }).then((data) => {
+        rm(dest, { recursive: true }).then((data) => {
           if (!data) {
-            mkdir(path.join(outDirPath,stylesDir), { recursive: true })
-            copyFiles()
+            mkdir(dest, { recursive: true })
+            copyFiles(src,dest)
           }
         })
       } else {
-        copyFiles()
+        copyFiles(src,dest)
       }
     })
   }catch(e){
@@ -249,6 +267,7 @@ async function copyAssets(){
 
 try {
   build()
+  // copyFolder(path.join(sourceDirPath,assetsDir),path.join(outDirPath,assetsDir))
   // copyAssets()
   // bundleCss()
 }catch(e){
