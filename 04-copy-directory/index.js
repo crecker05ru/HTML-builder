@@ -13,7 +13,6 @@ async function copyFiles() {
   try {
     let files = await readdir(srcPath)
     for (let file of files) {
-      console.log("file", file)
       copyFile(path.join(srcPath, file), path.join(copyPath, file))
     }
   } catch (e) {
