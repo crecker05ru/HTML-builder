@@ -67,6 +67,7 @@ async function writeIndex() {
                       )[0] === component.name.match(beforeDot)[0]
                     ) {
                       templateContent = templateContent.replace("{{"+component.name.match(beforeDot)[0]+"}}", data)
+                      console.log('component.name.match(beforeDot)[0]',component.name.match(beforeDot)[0])
                       writeHtml(templateContent)
                     }
                   }
@@ -142,7 +143,7 @@ async function bundleCss() {
               filesCount += 1
               if (filesContent.length === filesCount) {
                 fs.writeFile(
-                  path.join(outDirPath, "bundle.css"),
+                  path.join(outDirPath, "style.css"),
                   filesContent.join("\n"),
                   (err) => {
                     if (err) throw err
